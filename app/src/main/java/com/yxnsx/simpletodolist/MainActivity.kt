@@ -66,6 +66,8 @@ class TodoAdapter(private val myDataset: List<Todo>) :
 
     override fun onBindViewHolder(holder: TodoViewHolder, position: Int) {
         holder.todoBinding.textView.text = myDataset[position].text
+        holder.todoBinding.imageButton.setOnClickListener{
+        }
     }
 
     override fun getItemCount() = myDataset.size
