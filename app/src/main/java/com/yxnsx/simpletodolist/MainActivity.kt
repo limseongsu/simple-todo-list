@@ -23,6 +23,8 @@ class MainActivity : AppCompatActivity() {
 
         viewBinding.recyclerView.layoutManager = LinearLayoutManager(this)
         viewBinding.recyclerView.adapter = TodoAdapter(todoData)
+        viewBinding.buttonAdd.setOnClickListener {
+        }
     }
 }
 
