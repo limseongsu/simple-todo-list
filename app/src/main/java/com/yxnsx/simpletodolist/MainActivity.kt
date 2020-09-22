@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.yxnsx.simpletodolist.databinding.ActivityMainBinding
 import com.yxnsx.simpletodolist.databinding.ItemTodoBinding
@@ -13,7 +14,7 @@ import com.yxnsx.simpletodolist.databinding.ItemTodoBinding
 class MainActivity : AppCompatActivity() {
 
     private lateinit var viewBinding: ActivityMainBinding
-
+    private val todoData = arrayListOf<Todo>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -21,6 +22,9 @@ class MainActivity : AppCompatActivity() {
         viewBinding = ActivityMainBinding.inflate(layoutInflater)
         val view = viewBinding.root
         setContentView(view)
+
+        viewBinding.recyclerView.layoutManager = LinearLayoutManager(this)
+        viewBinding.recyclerView.adapter = TodoAdapter(todoData)
     }
 }
 
