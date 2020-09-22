@@ -7,11 +7,20 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.yxnsx.simpletodolist.databinding.ActivityMainBinding
+import com.yxnsx.simpletodolist.databinding.ItemTodoBinding
 
 class MainActivity : AppCompatActivity() {
+
+    private lateinit var viewBinding: ActivityMainBinding
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+
+        viewBinding = ActivityMainBinding.inflate(layoutInflater)
+        val view = viewBinding.root
+        setContentView(view)
     }
 }
 
@@ -23,18 +32,17 @@ data class Todo (
 class TodoAdapter(private val myDataset: List<Todo>) :
     RecyclerView.Adapter<TodoAdapter.TodoViewHolder>() {
 
-    class TodoViewHolder(val view: View) : RecyclerView.ViewHolder(view)
+    class TodoViewHolder(val todoBinding: ItemTodoBinding) : RecyclerView.ViewHolder(todoBinding.root)
 
     override fun onCreateViewHolder(parent: ViewGroup,
                                     viewType: Int): TodoAdapter.TodoViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_todo, parent, false)
-        return TodoViewHolder(view)
+        return TodoViewHolder(ItemTodoBinding.bind(view))
     }
 
     override fun onBindViewHolder(holder: TodoViewHolder, position: Int) {
-        val textView_todo = holder.view.findViewById<TextView>(R.id.editText_todo)
-        textView_todo.text = myDataset[position].text
+        holder.todoBinding.textView.text = myDataset[position].text
     }
 
     override fun getItemCount() = myDataset.size
