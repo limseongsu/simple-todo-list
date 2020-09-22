@@ -2,6 +2,7 @@ package com.yxnsx.simpletodolist
 
 import android.app.Activity
 import android.content.Context
+import android.graphics.Paint
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -25,12 +26,18 @@ class MainActivity : AppCompatActivity() {
         val view = viewBinding.root
         setContentView(view)
 
-        viewBinding.recyclerView.layoutManager = LinearLayoutManager(this)
-        viewBinding.recyclerView.adapter = TodoAdapter(todoData,
-            onClickDeleteIcon = {
-                deleteTodo(it)
-            }
-        )
+        viewBinding.recyclerView.apply {
+            layoutManager = LinearLayoutManager(context)
+            adapter = TodoAdapter(
+                todoData,
+                onClickDeleteIcon = {
+                    deleteTodo(it)
+                },
+                onClickTodoItem = {
+                    doneTodo(it)
+                }
+            )
+        }
         viewBinding.buttonAdd.setOnClickListener {
             addTodo()
         }
@@ -45,8 +52,13 @@ class MainActivity : AppCompatActivity() {
         viewBinding.recyclerView.adapter?.notifyDataSetChanged()
     }
 
-    fun deleteTodo(todo: Todo) {
+    private fun deleteTodo(todo: Todo) {
         todoData.remove(todo)
+        viewBinding.recyclerView.adapter?.notifyDataSetChanged()
+    }
+
+    private fun doneTodo(todo: Todo) {
+        todo.isDone = !todo.isDone
         viewBinding.recyclerView.adapter?.notifyDataSetChanged()
     }
 
@@ -64,7 +76,8 @@ data class Todo(
 
 class TodoAdapter(
     private val myDataset: List<Todo>,
-    val onClickDeleteIcon: (todo: Todo) -> Unit
+    val onClickDeleteIcon: (todo: Todo) -> Unit,
+    val onClickTodoItem: (todo: Todo) -> Unit
 ) :
     RecyclerView.Adapter<TodoAdapter.TodoViewHolder>() {
 
@@ -74,7 +87,7 @@ class TodoAdapter(
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int
-    ): TodoAdapter.TodoViewHolder {
+    ): TodoViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_todo, parent, false)
         return TodoViewHolder(ItemTodoBinding.bind(view))
@@ -83,9 +96,24 @@ class TodoAdapter(
     override fun onBindViewHolder(holder: TodoViewHolder, position: Int) {
         val todo = myDataset[position]
 
-        holder.todoBinding.textView.text = todo.text
-        holder.todoBinding.imageButton.setOnClickListener {
-            onClickDeleteIcon.invoke(todo)
+        if (todo.isDone) {
+            holder.todoBinding.textView.apply {
+                paintFlags = paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
+            }
+        } else {
+            holder.todoBinding.textView.apply {
+                paintFlags = 0
+            }
+        }
+
+        holder.todoBinding.apply {
+            textView.text = todo.text
+            imageButton.setOnClickListener {
+                onClickDeleteIcon.invoke(todo)
+            }
+            root.setOnClickListener {
+                onClickTodoItem.invoke(todo)
+            }
         }
     }
 
