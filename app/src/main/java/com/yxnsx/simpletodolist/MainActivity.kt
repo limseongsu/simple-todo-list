@@ -24,7 +24,16 @@ class MainActivity : AppCompatActivity() {
         viewBinding.recyclerView.layoutManager = LinearLayoutManager(this)
         viewBinding.recyclerView.adapter = TodoAdapter(todoData)
         viewBinding.buttonAdd.setOnClickListener {
+            addTodo()
         }
+    }
+
+    private fun addTodo() {
+        val todo = Todo(viewBinding.editTextTodo.text.toString())
+        todoData.add(todo)
+
+        viewBinding.editTextTodo.setText("")
+        viewBinding.recyclerView.adapter?.notifyDataSetChanged()
     }
 }
 
