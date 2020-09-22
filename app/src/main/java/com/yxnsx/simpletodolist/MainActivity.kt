@@ -30,7 +30,7 @@ class MainActivity : AppCompatActivity() {
 
 data class Todo (
     val text: String,
-    var isDone: Boolean
+    var isDone: Boolean = false
 )
 
 class TodoAdapter(private val myDataset: List<Todo>) :
