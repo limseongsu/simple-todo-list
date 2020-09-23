@@ -57,25 +57,6 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-//    private fun addTodo() {
-//        val todo = Todo(viewBinding.editTextTodo.text.toString())
-//        todoData.add(todo)
-//
-//        hideKeyboard(viewBinding.root)
-//        viewBinding.editTextTodo.setText("")
-//        viewBinding.recyclerView.adapter?.notifyDataSetChanged()
-//    }
-//
-//    private fun deleteTodo(todo: Todo) {
-//        todoData.remove(todo)
-//        viewBinding.recyclerView.adapter?.notifyDataSetChanged()
-//    }
-//
-//    private fun doneTodo(todo: Todo) {
-//        todo.isDone = !todo.isDone
-//        viewBinding.recyclerView.adapter?.notifyDataSetChanged()
-//    }
-
     private fun Context.hideKeyboard(view: View) {
         val inputMethodManager =
             getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
