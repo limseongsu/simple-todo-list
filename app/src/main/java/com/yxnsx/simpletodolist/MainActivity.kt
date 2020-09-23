@@ -10,6 +10,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import androidx.activity.viewModels
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -32,25 +35,26 @@ class MainActivity : AppCompatActivity() {
         viewBinding.recyclerView.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = TodoAdapter(
-                mainViewModel.todoData,
+                emptyList(),
                 onClickDeleteIcon = {
                     mainViewModel.deleteTodo(it)
-                    viewBinding.recyclerView.adapter?.notifyDataSetChanged()
                 },
                 onClickTodoItem = {
                     mainViewModel.doneTodo(it)
-                    viewBinding.recyclerView.adapter?.notifyDataSetChanged()
                 }
             )
         }
         viewBinding.buttonAdd.setOnClickListener {
             val todo: Todo = Todo(viewBinding.editTextTodo.text.toString())
             mainViewModel.addTodo(todo)
-            viewBinding.recyclerView.adapter?.notifyDataSetChanged()
 
             hideKeyboard(viewBinding.root)
             viewBinding.editTextTodo.setText("")
         }
+
+        mainViewModel.todoLiveData.observe(this, Observer {
+            (viewBinding.recyclerView.adapter as TodoAdapter).setLiveData(it)
+        })
     }
 
 //    private fun addTodo() {
@@ -85,7 +89,7 @@ data class Todo(
 )
 
 class TodoAdapter(
-    private val myDataset: List<Todo>,
+    private var myDataset: List<Todo>,
     val onClickDeleteIcon: (todo: Todo) -> Unit,
     val onClickTodoItem: (todo: Todo) -> Unit
 ) :
@@ -128,20 +132,29 @@ class TodoAdapter(
     }
 
     override fun getItemCount() = myDataset.size
+
+    fun setLiveData(newData: List<Todo>) {
+        myDataset = newData
+        notifyDataSetChanged()
+    }
 }
 
 class MainViewModel: ViewModel() {
-    val todoData = arrayListOf<Todo>()
+    private val todoData = arrayListOf<Todo>()
+    val todoLiveData = MutableLiveData<List<Todo>>()
 
     fun addTodo(todo: Todo) {
         todoData.add(todo)
+        todoLiveData.value = todoData
     }
 
     fun deleteTodo(todo: Todo) {
         todoData.remove(todo)
+        todoLiveData.value = todoData
     }
 
     fun doneTodo(todo: Todo) {
         todo.isDone = !todo.isDone
+        todoLiveData.value = todoData
     }
 }
