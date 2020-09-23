@@ -242,3 +242,7 @@ fabric.properties
 /captures
 .externalNativeBuild
 .cxx
+
+
+# firebase
+app/google-services.json
