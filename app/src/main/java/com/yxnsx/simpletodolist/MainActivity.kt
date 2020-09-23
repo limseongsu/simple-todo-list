@@ -9,6 +9,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
+import androidx.activity.viewModels
+import androidx.lifecycle.ViewModel
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.yxnsx.simpletodolist.databinding.ActivityMainBinding
@@ -17,7 +19,8 @@ import com.yxnsx.simpletodolist.databinding.ItemTodoBinding
 class MainActivity : AppCompatActivity() {
 
     private lateinit var viewBinding: ActivityMainBinding
-    private val todoData = arrayListOf<Todo>()
+    private val mainViewModel: MainViewModel by viewModels<MainViewModel>()
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,38 +32,45 @@ class MainActivity : AppCompatActivity() {
         viewBinding.recyclerView.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = TodoAdapter(
-                todoData,
+                mainViewModel.todoData,
                 onClickDeleteIcon = {
-                    deleteTodo(it)
+                    mainViewModel.deleteTodo(it)
+                    viewBinding.recyclerView.adapter?.notifyDataSetChanged()
                 },
                 onClickTodoItem = {
-                    doneTodo(it)
+                    mainViewModel.doneTodo(it)
+                    viewBinding.recyclerView.adapter?.notifyDataSetChanged()
                 }
             )
         }
         viewBinding.buttonAdd.setOnClickListener {
-            addTodo()
+            val todo: Todo = Todo(viewBinding.editTextTodo.text.toString())
+            mainViewModel.addTodo(todo)
+            viewBinding.recyclerView.adapter?.notifyDataSetChanged()
+
+            hideKeyboard(viewBinding.root)
+            viewBinding.editTextTodo.setText("")
         }
     }
 
-    private fun addTodo() {
-        val todo = Todo(viewBinding.editTextTodo.text.toString())
-        todoData.add(todo)
-
-        hideKeyboard(viewBinding.root)
-        viewBinding.editTextTodo.setText("")
-        viewBinding.recyclerView.adapter?.notifyDataSetChanged()
-    }
-
-    private fun deleteTodo(todo: Todo) {
-        todoData.remove(todo)
-        viewBinding.recyclerView.adapter?.notifyDataSetChanged()
-    }
-
-    private fun doneTodo(todo: Todo) {
-        todo.isDone = !todo.isDone
-        viewBinding.recyclerView.adapter?.notifyDataSetChanged()
-    }
+//    private fun addTodo() {
+//        val todo = Todo(viewBinding.editTextTodo.text.toString())
+//        todoData.add(todo)
+//
+//        hideKeyboard(viewBinding.root)
+//        viewBinding.editTextTodo.setText("")
+//        viewBinding.recyclerView.adapter?.notifyDataSetChanged()
+//    }
+//
+//    private fun deleteTodo(todo: Todo) {
+//        todoData.remove(todo)
+//        viewBinding.recyclerView.adapter?.notifyDataSetChanged()
+//    }
+//
+//    private fun doneTodo(todo: Todo) {
+//        todo.isDone = !todo.isDone
+//        viewBinding.recyclerView.adapter?.notifyDataSetChanged()
+//    }
 
     private fun Context.hideKeyboard(view: View) {
         val inputMethodManager =
@@ -118,4 +128,20 @@ class TodoAdapter(
     }
 
     override fun getItemCount() = myDataset.size
+}
+
+class MainViewModel: ViewModel() {
+    val todoData = arrayListOf<Todo>()
+
+    fun addTodo(todo: Todo) {
+        todoData.add(todo)
+    }
+
+    fun deleteTodo(todo: Todo) {
+        todoData.remove(todo)
+    }
+
+    fun doneTodo(todo: Todo) {
+        todo.isDone = !todo.isDone
+    }
 }
