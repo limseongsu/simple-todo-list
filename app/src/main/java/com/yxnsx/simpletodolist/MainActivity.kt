@@ -49,7 +49,7 @@ class MainActivity : AppCompatActivity() {
         Log.d(TAG, "onCreate: currentUser = $currentUser")
 
         // 유저 객체가 null이 아닐 경우
-        if(currentUser != null) {
+        if (currentUser != null) {
             // userID 값 받아오기
             userID = currentUser.uid
 

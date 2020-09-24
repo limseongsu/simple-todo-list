@@ -9,7 +9,7 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 
 
-class MainViewModel: ViewModel() {
+class MainViewModel : ViewModel() {
     val todoLiveData = MutableLiveData<List<DocumentSnapshot>>()
     private val database = Firebase.firestore
     private val user = Firebase.auth.currentUser
@@ -25,11 +25,11 @@ class MainViewModel: ViewModel() {
             database.collection(user.uid)
                 .addSnapshotListener { value, error ->
                     // 에러가 발생한 경우
-                    if(error != null) {
+                    if (error != null) {
                         return@addSnapshotListener
                     }
                     // 가져올 값이 있을 경우
-                    if(value != null) {
+                    if (value != null) {
                         // todoLiveData 리스트에 DocumentSnapshot 형태로 값 담기
                         todoLiveData.value = value.documents
 
