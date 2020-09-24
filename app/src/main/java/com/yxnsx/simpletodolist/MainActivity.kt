@@ -11,17 +11,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import androidx.activity.viewModels
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.DocumentSnapshot
-import com.google.firebase.firestore.QueryDocumentSnapshot
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.yxnsx.simpletodolist.databinding.ActivityMainBinding
@@ -78,7 +75,7 @@ class MainActivity : AppCompatActivity() {
             )
         }
         viewBinding.buttonAdd.setOnClickListener {
-            val todo: Todo = Todo(viewBinding.editTextTodo.text.toString())
+            val todo: TodoModel = TodoModel(viewBinding.editTextTodo.text.toString())
             mainViewModel.addTodo(todo)
 
             hideKeyboard(viewBinding.root)
@@ -94,126 +91,5 @@ class MainActivity : AppCompatActivity() {
         val inputMethodManager =
             getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
         inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
-    }
-}
-
-data class Todo(
-    val text: String,
-    var isDone: Boolean = false
-)
-
-class TodoAdapter(
-    private var myDataset: List<DocumentSnapshot>,
-    val onClickDeleteIcon: (todo: DocumentSnapshot) -> Unit,
-    val onClickTodoItem: (todo: DocumentSnapshot) -> Unit
-) :
-    RecyclerView.Adapter<TodoAdapter.TodoViewHolder>() {
-
-    class TodoViewHolder(val todoBinding: ItemTodoBinding) :
-        RecyclerView.ViewHolder(todoBinding.root)
-
-    override fun onCreateViewHolder(
-        parent: ViewGroup,
-        viewType: Int
-    ): TodoViewHolder {
-        val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_todo, parent, false)
-        return TodoViewHolder(ItemTodoBinding.bind(view))
-    }
-
-    override fun onBindViewHolder(holder: TodoViewHolder, position: Int) {
-        val todo = myDataset[position]
-
-        if (todo.getBoolean("isDone") == true) {
-            holder.todoBinding.textView.apply {
-                paintFlags = paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
-            }
-        } else {
-            holder.todoBinding.textView.apply {
-                paintFlags = 0
-            }
-        }
-
-        holder.todoBinding.apply {
-            textView.text = todo.getString("text")
-            imageButton.setOnClickListener {
-                onClickDeleteIcon.invoke(todo)
-            }
-            root.setOnClickListener {
-                onClickTodoItem.invoke(todo)
-            }
-        }
-    }
-
-    override fun getItemCount() = myDataset.size
-
-    fun setLiveData(newData: List<DocumentSnapshot>) {
-        myDataset = newData
-        notifyDataSetChanged()
-    }
-}
-
-class MainViewModel: ViewModel() {
-    val todoLiveData = MutableLiveData<List<DocumentSnapshot>>()
-    val database = Firebase.firestore
-    val user = Firebase.auth.currentUser
-
-    companion object {
-        const val TAG = "디버깅"
-    }
-
-    init {
-        fetchData()
-    }
-
-    private fun fetchData() {
-        if (user != null) {
-            database.collection(user.uid)
-                .addSnapshotListener { value, error ->
-                    if(error != null) {
-                        return@addSnapshotListener
-                    }
-                    if(value != null) {
-                        todoLiveData.value = value.documents
-                    }
-                }
-        }
-    }
-
-    fun addTodo(todo: Todo) {
-        user?.let { user ->
-            database.collection(user.uid).add(todo)
-                .addOnSuccessListener {
-                    Log.d(TAG, "addTodo: SUCCESS")
-                }
-                .addOnFailureListener { error ->
-                    Log.d(TAG, "addTodo: Error adding document", error)
-                }
-        }
-    }
-
-    fun deleteTodo(todo: DocumentSnapshot) {
-        user?.let { user ->
-            database.collection(user.uid).document(todo.id).delete()
-                .addOnSuccessListener {
-                    Log.d(TAG, "deleteTodo: SUCCESS")
-                }
-                .addOnFailureListener { error ->
-                    Log.d(TAG, "deleteTodo: Error adding document", error)
-                }
-        }
-    }
-
-    fun doneTodo(todo: DocumentSnapshot) {
-        user?.let { user ->
-            val isDone = todo.getBoolean("isDone") ?: false
-            database.collection(user.uid).document(todo.id).update("isDone", !isDone)
-                .addOnSuccessListener {
-                    Log.d(TAG, "doneTodo: SUCCESS")
-                }
-                .addOnFailureListener { error ->
-                    Log.d(TAG, "doneTodo: Error adding document", error)
-                }
-        }
     }
 }
