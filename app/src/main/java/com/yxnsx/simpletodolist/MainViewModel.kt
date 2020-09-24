@@ -73,11 +73,11 @@ class MainViewModel : ViewModel() {
     fun doneTodo(todo: DocumentSnapshot) {
         // 유저가 null이 아닐 경우
         user?.let { user ->
-            // isDone이 null일 경우 false로 지정
-            val isDone = todo.getBoolean("isDone") ?: false
+            // done null일 경우 false로 지정
+            val done = todo.getBoolean("done") ?: false
 
-            // uid 값을 바탕으로 데이터베이스에서 DocumentSnapshot id 값과 일치하는 데이터의 isDone 값 반전
-            database.collection(user.uid).document(todo.id).update("isDone", !isDone)
+            // uid 값을 바탕으로 데이터베이스에서 DocumentSnapshot id 값과 일치하는 데이터의 done 값 반전
+            database.collection(user.uid).document(todo.id).update("done", !done)
                 .addOnSuccessListener {
                     Log.d(TAG, "doneTodo: SUCCESS")
                 }

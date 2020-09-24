@@ -87,7 +87,7 @@ class MainActivity : AppCompatActivity() {
 
         // 추가 버튼 클릭리스너 설정
         viewBinding.buttonAdd.setOnClickListener {
-            // editText에 입력한 값 바탕으로 todoModel 객체 생성 (isDone 값은 기본 false)
+            // editText에 입력한 값 바탕으로 todoModel 객체 생성 (done 값은 기본 false)
             val todo = TodoModel(viewBinding.editTextTodo.text.toString())
             // 뷰모델을 통해 데이터베이스에 todo 추가
             mainViewModel.addTodo(todo)

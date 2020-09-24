@@ -5,6 +5,6 @@ import com.google.firebase.firestore.ServerTimestamp
 
 data class TodoModel(
     val text: String,
-    var isDone: Boolean = false,
+    var done: Boolean = false,
     @ServerTimestamp val timeStamp: Timestamp? = null
 )
