@@ -9,7 +9,7 @@ import com.yxnsx.simpletodolist.databinding.ItemTodoBinding
 
 
 class TodoAdapter(
-    private var myDataset: List<DocumentSnapshot>,
+    private var documentSnapshotList: List<DocumentSnapshot>,
     val onClickDeleteIcon: (todo: DocumentSnapshot) -> Unit,
     val onClickTodoItem: (todo: DocumentSnapshot) -> Unit
 ) :
@@ -29,7 +29,7 @@ class TodoAdapter(
     }
 
     override fun onBindViewHolder(holder: TodoViewHolder, position: Int) {
-        val todo = myDataset[position]
+        val todo = documentSnapshotList[position]
 
         if (todo.getBoolean("isDone") == true) {
             holder.todoBinding.textViewTodo.apply {
@@ -52,10 +52,10 @@ class TodoAdapter(
         }
     }
 
-    override fun getItemCount() = myDataset.size
+    override fun getItemCount() = documentSnapshotList.size
 
     fun setLiveData(newData: List<DocumentSnapshot>) {
-        myDataset = newData
+        documentSnapshotList = newData
         notifyDataSetChanged()
     }
 }
