@@ -20,6 +20,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.QueryDocumentSnapshot
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.yxnsx.simpletodolist.databinding.ActivityMainBinding
@@ -101,9 +103,9 @@ data class Todo(
 )
 
 class TodoAdapter(
-    private var myDataset: List<Todo>,
-    val onClickDeleteIcon: (todo: Todo) -> Unit,
-    val onClickTodoItem: (todo: Todo) -> Unit
+    private var myDataset: List<DocumentSnapshot>,
+    val onClickDeleteIcon: (todo: DocumentSnapshot) -> Unit,
+    val onClickTodoItem: (todo: DocumentSnapshot) -> Unit
 ) :
     RecyclerView.Adapter<TodoAdapter.TodoViewHolder>() {
 
@@ -122,7 +124,7 @@ class TodoAdapter(
     override fun onBindViewHolder(holder: TodoViewHolder, position: Int) {
         val todo = myDataset[position]
 
-        if (todo.isDone) {
+        if (todo.getBoolean("isDone") == true) {
             holder.todoBinding.textView.apply {
                 paintFlags = paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
             }
@@ -133,7 +135,7 @@ class TodoAdapter(
         }
 
         holder.todoBinding.apply {
-            textView.text = todo.text
+            textView.text = todo.getString("text")
             imageButton.setOnClickListener {
                 onClickDeleteIcon.invoke(todo)
             }
@@ -145,15 +147,14 @@ class TodoAdapter(
 
     override fun getItemCount() = myDataset.size
 
-    fun setLiveData(newData: List<Todo>) {
+    fun setLiveData(newData: List<DocumentSnapshot>) {
         myDataset = newData
         notifyDataSetChanged()
     }
 }
 
 class MainViewModel: ViewModel() {
-    private val todoData = arrayListOf<Todo>()
-    val todoLiveData = MutableLiveData<List<Todo>>()
+    val todoLiveData = MutableLiveData<List<DocumentSnapshot>>()
     val database = Firebase.firestore
     val user = Firebase.auth.currentUser
 
@@ -169,18 +170,12 @@ class MainViewModel: ViewModel() {
         if (user != null) {
             database.collection(user.uid)
                 .addSnapshotListener { value, error ->
-                    todoData.clear()
                     if(error != null) {
                         return@addSnapshotListener
                     }
-                    for (document in value!!) {
-                        val todo = Todo(
-                            document.getString("text")?: "",
-                            document.getBoolean("isDone")?: false
-                        )
-                        todoData.add(todo)
+                    if(value != null) {
+                        todoLiveData.value = value.documents
                     }
-                    todoLiveData.value = todoData
                 }
         }
     }
@@ -188,7 +183,7 @@ class MainViewModel: ViewModel() {
     fun addTodo(todo: Todo) {
         user?.let { user ->
             database.collection(user.uid).add(todo)
-                .addOnSuccessListener { result ->
+                .addOnSuccessListener {
                     Log.d(TAG, "addTodo: SUCCESS")
                 }
                 .addOnFailureListener { error ->
@@ -197,13 +192,28 @@ class MainViewModel: ViewModel() {
         }
     }
 
-    fun deleteTodo(todo: Todo) {
-        todoData.remove(todo)
-        todoLiveData.value = todoData
+    fun deleteTodo(todo: DocumentSnapshot) {
+        user?.let { user ->
+            database.collection(user.uid).document(todo.id).delete()
+                .addOnSuccessListener {
+                    Log.d(TAG, "deleteTodo: SUCCESS")
+                }
+                .addOnFailureListener { error ->
+                    Log.d(TAG, "deleteTodo: Error adding document", error)
+                }
+        }
     }
 
-    fun doneTodo(todo: Todo) {
-        todo.isDone = !todo.isDone
-        todoLiveData.value = todoData
+    fun doneTodo(todo: DocumentSnapshot) {
+        user?.let { user ->
+            val isDone = todo.getBoolean("isDone") ?: false
+            database.collection(user.uid).document(todo.id).update("isDone", !isDone)
+                .addOnSuccessListener {
+                    Log.d(TAG, "doneTodo: SUCCESS")
+                }
+                .addOnFailureListener { error ->
+                    Log.d(TAG, "doneTodo: Error adding document", error)
+                }
+        }
     }
 }
