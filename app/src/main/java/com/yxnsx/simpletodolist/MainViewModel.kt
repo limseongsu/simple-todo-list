@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 
@@ -23,6 +24,7 @@ class MainViewModel : ViewModel() {
         if (user != null) {
             // uid 값을 바탕으로 데이터베이스 가져오기
             database.collection(user.uid)
+                .orderBy("timeStamp", Query.Direction.DESCENDING)
                 .addSnapshotListener { value, error ->
                     // 에러가 발생한 경우
                     if (error != null) {
