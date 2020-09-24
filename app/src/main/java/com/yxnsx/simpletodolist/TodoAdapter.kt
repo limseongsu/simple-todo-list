@@ -39,13 +39,14 @@ class TodoAdapter(
             holder.todoBinding.apply {
                 textViewTodo.paintFlags = textViewTodo.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
                 textViewTodo.setTextColor(root.context.getColor(R.color.colorBlack_30))
+                buttonDelete.setBackgroundResource(R.drawable.icon_delete_30)
             }
 
         } else { // todo 객체의 done 불리언 값이 false일 경우
-
             holder.todoBinding.apply {
                 textViewTodo.paintFlags = 0
                 textViewTodo.setTextColor(root.context.getColor(R.color.colorBlack))
+                buttonDelete.setBackgroundResource(R.drawable.icon_delete)
             }
         }
 
@@ -54,7 +55,7 @@ class TodoAdapter(
             textViewTodo.text = todo.getString("text")
 
             // 삭제 버튼 클릭리스너 설정
-            imageButtonDelete.setOnClickListener {
+            buttonDelete.setOnClickListener {
                 onClickDeleteIcon.invoke(todo)
             }
             // 아이템 클릭리스너 설정
