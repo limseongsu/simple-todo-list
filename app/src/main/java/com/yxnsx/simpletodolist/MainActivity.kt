@@ -155,6 +155,7 @@ class MainViewModel: ViewModel() {
     private val todoData = arrayListOf<Todo>()
     val todoLiveData = MutableLiveData<List<Todo>>()
     val database = Firebase.firestore
+    val user = Firebase.auth.currentUser
 
     companion object {
         const val TAG = "디버깅"
@@ -164,8 +165,7 @@ class MainViewModel: ViewModel() {
         fetchData()
     }
 
-    fun fetchData() {
-        val user = Firebase.auth.currentUser
+    private fun fetchData() {
         if (user != null) {
             database.collection(user.uid)
                 .addSnapshotListener { value, error ->
@@ -186,8 +186,15 @@ class MainViewModel: ViewModel() {
     }
 
     fun addTodo(todo: Todo) {
-        todoData.add(todo)
-        todoLiveData.value = todoData
+        user?.let { user ->
+            database.collection(user.uid).add(todo)
+                .addOnSuccessListener { result ->
+                    Log.d(TAG, "addTodo: SUCCESS")
+                }
+                .addOnFailureListener { error ->
+                    Log.d(TAG, "addTodo: Error adding document", error)
+                }
+        }
     }
 
     fun deleteTodo(todo: Todo) {
