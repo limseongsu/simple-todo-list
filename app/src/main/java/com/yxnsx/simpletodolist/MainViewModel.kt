@@ -19,10 +19,6 @@ class MainViewModel: ViewModel() {
     }
 
     init {
-        fetchData()
-    }
-
-    private fun fetchData() {
         if (user != null) {
             database.collection(user.uid)
                 .addSnapshotListener { value, error ->
