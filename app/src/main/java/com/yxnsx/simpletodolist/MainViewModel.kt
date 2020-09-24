@@ -11,8 +11,8 @@ import com.google.firebase.ktx.Firebase
 
 class MainViewModel: ViewModel() {
     val todoLiveData = MutableLiveData<List<DocumentSnapshot>>()
-    val database = Firebase.firestore
-    val user = Firebase.auth.currentUser
+    private val database = Firebase.firestore
+    private val user = Firebase.auth.currentUser
 
     companion object {
         const val TAG = "디버깅"
