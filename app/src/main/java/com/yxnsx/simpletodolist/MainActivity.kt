@@ -20,6 +20,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.yxnsx.simpletodolist.databinding.ActivityMainBinding
 import com.yxnsx.simpletodolist.databinding.ItemTodoBinding
@@ -153,6 +154,29 @@ class TodoAdapter(
 class MainViewModel: ViewModel() {
     private val todoData = arrayListOf<Todo>()
     val todoLiveData = MutableLiveData<List<Todo>>()
+    val database = Firebase.firestore
+
+    companion object {
+        const val TAG = "디버깅"
+    }
+
+    init {
+        database.collection("todos")
+            .get()
+            .addOnSuccessListener { result ->
+                for (document in result) {
+                    val todo = Todo(
+                        document.data["text"] as String,
+                        document.data["isDone"] as Boolean
+                    )
+                    todoData.add(todo)
+                }
+                todoLiveData.value = todoData
+            }
+            .addOnFailureListener { exception ->
+                Log.d(TAG, "MainViewModel: Error getting documents", exception)
+            }
+    }
 
     fun addTodo(todo: Todo) {
         todoData.add(todo)
