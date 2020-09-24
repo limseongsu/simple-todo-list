@@ -32,6 +32,9 @@ class MainViewModel: ViewModel() {
                     if(value != null) {
                         // todoLiveData 리스트에 DocumentSnapshot 형태로 값 담기
                         todoLiveData.value = value.documents
+
+                    } else { // 가져올 값이 없을 경우
+                        Log.d(TAG, "MainViewModel : 가져올 값이 없음")
                     }
                 }
         }
