@@ -11,17 +11,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import androidx.activity.viewModels
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.DocumentSnapshot
-import com.google.firebase.firestore.QueryDocumentSnapshot
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.yxnsx.simpletodolist.databinding.ActivityMainBinding
@@ -41,30 +38,40 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // 뷰바인딩 적용
         viewBinding = ActivityMainBinding.inflate(layoutInflater)
         val view = viewBinding.root
         setContentView(view)
 
+        // 파이어베이스 익명로그인을 위한 유저 객체 생성
         firebaseAuth = Firebase.auth
         val currentUser = firebaseAuth.currentUser
         Log.d(TAG, "onCreate: currentUser = $currentUser")
 
-        if(currentUser != null) {
+        // 유저 객체가 null이 아닐 경우
+        if (currentUser != null) {
+            // userID 값 받아오기
             userID = currentUser.uid
-        } else {
+
+        } else { // 유저 객체가 null인 경우
+            // 파이어베이스 익명로그인 실행
             firebaseAuth.signInAnonymously().addOnCompleteListener(this) { task ->
+
+                // 익명로그인이 성공했을 경우
                 if (task.isSuccessful) {
-                    Log.d(TAG, "signInAnonymously:success")
+                    // 새 유저 객체 생성 후 userID 값 받아오기
                     val newUser = firebaseAuth.currentUser
                     userID = newUser!!.uid
+                    Log.d(TAG, "signInAnonymously:success")
                     Log.d(TAG, "onCreate: newUser = $newUser")
 
-                } else {
+                } else { // 익명로그인이 실패했을 경우
                     Log.w(TAG, "signInAnonymously:failure", task.exception)
                 }
             }
         }
 
+        // 리사이클러뷰 설정 - 레이아웃 매니저, 어댑터
         viewBinding.recyclerView.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = TodoAdapter(
@@ -77,14 +84,20 @@ class MainActivity : AppCompatActivity() {
                 }
             )
         }
+
+        // 추가 버튼 클릭리스너 설정
         viewBinding.buttonAdd.setOnClickListener {
-            val todo: Todo = Todo(viewBinding.editTextTodo.text.toString())
+            // editText에 입력한 값 바탕으로 todoModel 객체 생성 (isDone 값은 기본 false)
+            val todo = TodoModel(viewBinding.editTextTodo.text.toString())
+            // 뷰모델을 통해 데이터베이스에 todo 추가
             mainViewModel.addTodo(todo)
 
+            // 추가 후 키보드 숨기기, editText 입력 폼 비우기
             hideKeyboard(viewBinding.root)
             viewBinding.editTextTodo.setText("")
         }
 
+        // 뷰모델의 Observer를 통해 리사이클러뷰의 TodoAdapter에 변경값 갱신
         mainViewModel.todoLiveData.observe(this, Observer {
             (viewBinding.recyclerView.adapter as TodoAdapter).setLiveData(it)
         })
@@ -94,126 +107,5 @@ class MainActivity : AppCompatActivity() {
         val inputMethodManager =
             getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
         inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
-    }
-}
-
-data class Todo(
-    val text: String,
-    var isDone: Boolean = false
-)
-
-class TodoAdapter(
-    private var myDataset: List<DocumentSnapshot>,
-    val onClickDeleteIcon: (todo: DocumentSnapshot) -> Unit,
-    val onClickTodoItem: (todo: DocumentSnapshot) -> Unit
-) :
-    RecyclerView.Adapter<TodoAdapter.TodoViewHolder>() {
-
-    class TodoViewHolder(val todoBinding: ItemTodoBinding) :
-        RecyclerView.ViewHolder(todoBinding.root)
-
-    override fun onCreateViewHolder(
-        parent: ViewGroup,
-        viewType: Int
-    ): TodoViewHolder {
-        val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_todo, parent, false)
-        return TodoViewHolder(ItemTodoBinding.bind(view))
-    }
-
-    override fun onBindViewHolder(holder: TodoViewHolder, position: Int) {
-        val todo = myDataset[position]
-
-        if (todo.getBoolean("isDone") == true) {
-            holder.todoBinding.textView.apply {
-                paintFlags = paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
-            }
-        } else {
-            holder.todoBinding.textView.apply {
-                paintFlags = 0
-            }
-        }
-
-        holder.todoBinding.apply {
-            textView.text = todo.getString("text")
-            imageButton.setOnClickListener {
-                onClickDeleteIcon.invoke(todo)
-            }
-            root.setOnClickListener {
-                onClickTodoItem.invoke(todo)
-            }
-        }
-    }
-
-    override fun getItemCount() = myDataset.size
-
-    fun setLiveData(newData: List<DocumentSnapshot>) {
-        myDataset = newData
-        notifyDataSetChanged()
-    }
-}
-
-class MainViewModel: ViewModel() {
-    val todoLiveData = MutableLiveData<List<DocumentSnapshot>>()
-    val database = Firebase.firestore
-    val user = Firebase.auth.currentUser
-
-    companion object {
-        const val TAG = "디버깅"
-    }
-
-    init {
-        fetchData()
-    }
-
-    private fun fetchData() {
-        if (user != null) {
-            database.collection(user.uid)
-                .addSnapshotListener { value, error ->
-                    if(error != null) {
-                        return@addSnapshotListener
-                    }
-                    if(value != null) {
-                        todoLiveData.value = value.documents
-                    }
-                }
-        }
-    }
-
-    fun addTodo(todo: Todo) {
-        user?.let { user ->
-            database.collection(user.uid).add(todo)
-                .addOnSuccessListener {
-                    Log.d(TAG, "addTodo: SUCCESS")
-                }
-                .addOnFailureListener { error ->
-                    Log.d(TAG, "addTodo: Error adding document", error)
-                }
-        }
-    }
-
-    fun deleteTodo(todo: DocumentSnapshot) {
-        user?.let { user ->
-            database.collection(user.uid).document(todo.id).delete()
-                .addOnSuccessListener {
-                    Log.d(TAG, "deleteTodo: SUCCESS")
-                }
-                .addOnFailureListener { error ->
-                    Log.d(TAG, "deleteTodo: Error adding document", error)
-                }
-        }
-    }
-
-    fun doneTodo(todo: DocumentSnapshot) {
-        user?.let { user ->
-            val isDone = todo.getBoolean("isDone") ?: false
-            database.collection(user.uid).document(todo.id).update("isDone", !isDone)
-                .addOnSuccessListener {
-                    Log.d(TAG, "doneTodo: SUCCESS")
-                }
-                .addOnFailureListener { error ->
-                    Log.d(TAG, "doneTodo: Error adding document", error)
-                }
-        }
     }
 }
