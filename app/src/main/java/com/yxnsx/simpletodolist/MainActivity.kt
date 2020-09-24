@@ -38,30 +38,40 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // 뷰바인딩 적용
         viewBinding = ActivityMainBinding.inflate(layoutInflater)
         val view = viewBinding.root
         setContentView(view)
 
+        // 파이어베이스 익명로그인을 위한 유저 객체 생성
         firebaseAuth = Firebase.auth
         val currentUser = firebaseAuth.currentUser
         Log.d(TAG, "onCreate: currentUser = $currentUser")
 
+        // 유저 객체가 null이 아닐 경우
         if(currentUser != null) {
+            // userID 값 받아오기
             userID = currentUser.uid
-        } else {
+
+        } else { // 유저 객체가 null인 경우
+            // 파이어베이스 익명로그인 실행
             firebaseAuth.signInAnonymously().addOnCompleteListener(this) { task ->
+
+                // 익명로그인이 성공했을 경우
                 if (task.isSuccessful) {
-                    Log.d(TAG, "signInAnonymously:success")
+                    // 새 유저 객체 생성 후 userID 값 받아오기
                     val newUser = firebaseAuth.currentUser
                     userID = newUser!!.uid
+                    Log.d(TAG, "signInAnonymously:success")
                     Log.d(TAG, "onCreate: newUser = $newUser")
 
-                } else {
+                } else { // 익명로그인이 실패했을 경우
                     Log.w(TAG, "signInAnonymously:failure", task.exception)
                 }
             }
         }
 
+        // 리사이클러뷰 설정 - 레이아웃 매니저, 어댑터
         viewBinding.recyclerView.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = TodoAdapter(
@@ -74,14 +84,20 @@ class MainActivity : AppCompatActivity() {
                 }
             )
         }
+
+        // 추가 버튼 클릭리스너 설정
         viewBinding.buttonAdd.setOnClickListener {
-            val todo: TodoModel = TodoModel(viewBinding.editTextTodo.text.toString())
+            // editText에 입력한 값 바탕으로 todoModel 객체 생성 (isDone 값은 기본 false)
+            val todo = TodoModel(viewBinding.editTextTodo.text.toString())
+            // 뷰모델을 통해 데이터베이스에 todo 추가
             mainViewModel.addTodo(todo)
 
+            // 추가 후 키보드 숨기기, editText 입력 폼 비우기
             hideKeyboard(viewBinding.root)
             viewBinding.editTextTodo.setText("")
         }
 
+        // 뷰모델의 Observer를 통해 리사이클러뷰의 TodoAdapter에 변경값 갱신
         mainViewModel.todoLiveData.observe(this, Observer {
             (viewBinding.recyclerView.adapter as TodoAdapter).setLiveData(it)
         })
