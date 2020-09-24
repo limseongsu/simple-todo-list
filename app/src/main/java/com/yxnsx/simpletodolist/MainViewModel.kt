@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 
@@ -23,6 +24,7 @@ class MainViewModel : ViewModel() {
         if (user != null) {
             // uid 값을 바탕으로 데이터베이스 가져오기
             database.collection(user.uid)
+                .orderBy("timeStamp", Query.Direction.DESCENDING)
                 .addSnapshotListener { value, error ->
                     // 에러가 발생한 경우
                     if (error != null) {
@@ -71,11 +73,11 @@ class MainViewModel : ViewModel() {
     fun doneTodo(todo: DocumentSnapshot) {
         // 유저가 null이 아닐 경우
         user?.let { user ->
-            // isDone이 null일 경우 false로 지정
-            val isDone = todo.getBoolean("isDone") ?: false
+            // done null일 경우 false로 지정
+            val done = todo.getBoolean("done") ?: false
 
-            // uid 값을 바탕으로 데이터베이스에서 DocumentSnapshot id 값과 일치하는 데이터의 isDone 값 반전
-            database.collection(user.uid).document(todo.id).update("isDone", !isDone)
+            // uid 값을 바탕으로 데이터베이스에서 DocumentSnapshot id 값과 일치하는 데이터의 done 값 반전
+            database.collection(user.uid).document(todo.id).update("done", !done)
                 .addOnSuccessListener {
                     Log.d(TAG, "doneTodo: SUCCESS")
                 }

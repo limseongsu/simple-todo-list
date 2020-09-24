@@ -34,17 +34,19 @@ class TodoAdapter(
         // documentSnapshotList의 인덱스 값 바탕으로 todo 객체 생성
         val todo = documentSnapshotList[position]
 
-        // todo 객체의 isDone 불리언 값이 true일 경우
-        if (todo.getBoolean("isDone") == true) {
-            // textViewTodo에 취소선 적용
-            holder.todoBinding.textViewTodo.apply {
-                paintFlags = paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
+        // todo 객체의 done 불리언 값이 true일 경우
+        if (todo.getBoolean("done") == true) {
+            holder.todoBinding.apply {
+                textViewTodo.paintFlags = textViewTodo.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
+                textViewTodo.setTextColor(root.context.getColor(R.color.colorBlack_30))
+                buttonDelete.setBackgroundResource(R.drawable.icon_delete_30)
             }
 
-        } else { // todo 객체의 isDone 불리언 값이 false일 경우
-            holder.todoBinding.textViewTodo.apply {
-                //textViewTodo에 취소선 미적용
-                paintFlags = 0
+        } else { // todo 객체의 done 불리언 값이 false일 경우
+            holder.todoBinding.apply {
+                textViewTodo.paintFlags = 0
+                textViewTodo.setTextColor(root.context.getColor(R.color.colorBlack))
+                buttonDelete.setBackgroundResource(R.drawable.icon_delete)
             }
         }
 
@@ -53,7 +55,7 @@ class TodoAdapter(
             textViewTodo.text = todo.getString("text")
 
             // 삭제 버튼 클릭리스너 설정
-            imageButtonDelete.setOnClickListener {
+            buttonDelete.setOnClickListener {
                 onClickDeleteIcon.invoke(todo)
             }
             // 아이템 클릭리스너 설정
