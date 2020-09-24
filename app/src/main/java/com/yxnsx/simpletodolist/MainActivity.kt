@@ -161,21 +161,28 @@ class MainViewModel: ViewModel() {
     }
 
     init {
-        database.collection("todos")
-            .get()
-            .addOnSuccessListener { result ->
-                for (document in result) {
-                    val todo = Todo(
-                        document.data["text"] as String,
-                        document.data["isDone"] as Boolean
-                    )
-                    todoData.add(todo)
+        fetchData()
+    }
+
+    fun fetchData() {
+        val user = Firebase.auth.currentUser
+        if (user != null) {
+            database.collection(user.uid)
+                .addSnapshotListener { value, error ->
+                    todoData.clear()
+                    if(error != null) {
+                        return@addSnapshotListener
+                    }
+                    for (document in value!!) {
+                        val todo = Todo(
+                            document.getString("text")?: "",
+                            document.getBoolean("isDone")?: false
+                        )
+                        todoData.add(todo)
+                    }
+                    todoLiveData.value = todoData
                 }
-                todoLiveData.value = todoData
-            }
-            .addOnFailureListener { exception ->
-                Log.d(TAG, "MainViewModel: Error getting documents", exception)
-            }
+        }
     }
 
     fun addTodo(todo: Todo) {
