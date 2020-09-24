@@ -39,12 +39,14 @@ class TodoAdapter(
             // textViewTodo에 취소선 적용
             holder.todoBinding.textViewTodo.apply {
                 paintFlags = paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
+                setTextColor(context.getColor(R.color.colorBlack_30))
             }
 
         } else { // todo 객체의 isDone 불리언 값이 false일 경우
             holder.todoBinding.textViewTodo.apply {
                 //textViewTodo에 취소선 미적용
                 paintFlags = 0
+                setTextColor(context.getColor(R.color.colorBlack))
             }
         }
 
