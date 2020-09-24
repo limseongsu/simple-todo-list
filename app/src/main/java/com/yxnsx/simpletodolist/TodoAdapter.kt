@@ -32,18 +32,18 @@ class TodoAdapter(
         val todo = myDataset[position]
 
         if (todo.getBoolean("isDone") == true) {
-            holder.todoBinding.textView.apply {
+            holder.todoBinding.textViewTodo.apply {
                 paintFlags = paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
             }
         } else {
-            holder.todoBinding.textView.apply {
+            holder.todoBinding.textViewTodo.apply {
                 paintFlags = 0
             }
         }
 
         holder.todoBinding.apply {
-            textView.text = todo.getString("text")
-            imageButton.setOnClickListener {
+            textViewTodo.text = todo.getString("text")
+            imageButtonDelete.setOnClickListener {
                 onClickDeleteIcon.invoke(todo)
             }
             root.setOnClickListener {
