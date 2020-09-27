@@ -24,7 +24,7 @@ class MainViewModel : ViewModel() {
         if (user != null) {
             // uid 값을 바탕으로 데이터베이스 가져오기
             database.collection(user.uid)
-                .orderBy("timeStamp", Query.Direction.ASCENDING)
+                .orderBy("timeStamp", Query.Direction.ASCENDING) //시간 오름차순으로 정렬
                 .addSnapshotListener { value, error ->
                     // 에러가 발생한 경우
                     if (error != null) {
