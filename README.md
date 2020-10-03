@@ -7,7 +7,7 @@
 <img width="951" alt="스크린샷 2020-10-03 오후 3 59 46" src="https://user-images.githubusercontent.com/47806943/94985419-7cf8a980-0591-11eb-99fc-14d98b8e5d01.png">
 
 ## 라이브러리/APIs
-* AAC - DataBinding </br>
+* AAC - ViewBinding </br>
 * AAC - ViewModel </br>
 * AAC - LiveData </br>
 * Firebase - Cloud Firestore </br>
