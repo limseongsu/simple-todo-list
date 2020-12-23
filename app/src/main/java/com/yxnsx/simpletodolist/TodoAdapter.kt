@@ -38,8 +38,8 @@ class TodoAdapter(
         if (todo.getBoolean("done") == true) {
             holder.todoBinding.apply {
                 textViewTodo.paintFlags = textViewTodo.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
-                textViewTodo.setTextColor(root.context.getColor(R.color.colorBlack_30))
-                buttonDelete.setBackgroundResource(R.drawable.icon_delete_30)
+                textViewTodo.setTextColor(root.context.getColor(R.color.colorBlack_15))
+                buttonDelete.setBackgroundResource(R.drawable.icon_delete_15)
             }
 
         } else { // todo 객체의 done 불리언 값이 false일 경우
