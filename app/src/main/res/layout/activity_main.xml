@@ -8,7 +8,7 @@
     tools:context=".MainActivity">
 
     <TextView
-        android:id="@+id/title"
+        android:id="@+id/textView_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
@@ -16,7 +16,7 @@
         android:fontFamily="@font/spoqa_han_sans_light"
         android:text="Simple/Tasks"
         android:textColor="@color/colorBlack"
-        android:textSize="48dp"
+        android:textSize="42dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -28,18 +28,63 @@
         android:background="@color/colorBlack"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/title" />
+        app:layout_constraintTop_toBottomOf="@+id/textView_title" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginBottom="8dp"
-        app:layout_constraintBottom_toTopOf="@+id/button_add"
+        app:layout_constraintBottom_toTopOf="@+id/line_middle"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/line_above"
         tools:listitem="@layout/item_todo" />
+
+    <View
+        android:id="@+id/line_middle"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginBottom="4dp"
+        android:background="@color/colorBlack"
+        app:layout_constraintBottom_toTopOf="@+id/textView_currentDate"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/textView_currentDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="4dp"
+        android:fontFamily="@font/spoqa_han_sans_regular"
+        android:text="2020/12/12"
+        android:textColor="@color/colorBlack"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toTopOf="@+id/line_below"
+        app:layout_constraintStart_toStartOf="@+id/textView_title" />
+
+    <TextView
+        android:id="@+id/textView_separator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:fontFamily="@font/spoqa_han_sans_regular"
+        android:text="---"
+        android:textColor="@color/colorBlack"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="@+id/textView_currentDate"
+        app:layout_constraintStart_toEndOf="@+id/textView_currentDate" />
+
+    <TextView
+        android:id="@+id/textView_day"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:fontFamily="@font/spoqa_han_sans_regular"
+        android:text="It's Monday!"
+        android:textColor="@color/colorBlack"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="@+id/textView_currentDate"
+        app:layout_constraintStart_toEndOf="@+id/textView_separator" />
 
     <View
         android:id="@+id/line_below"
@@ -58,10 +103,12 @@
         android:layout_marginStart="24dp"
         android:layout_marginEnd="8dp"
         android:background="@null"
+        android:ellipsize="end"
         android:fontFamily="@font/spoqa_han_sans_regular"
         android:hint="To do"
+        android:maxLines="1"
         android:textColor="@color/colorBlack"
-        android:textColorHighlight="@color/colorBlack_30"
+        android:textColorHighlight="@color/colorBlack_15"
         android:textCursorDrawable="@drawable/edit_text_cursor"
         android:textSelectHandle="@drawable/edit_text_handler"
         android:textSelectHandleLeft="@drawable/edit_text_handler"
@@ -81,8 +128,8 @@
         android:background="@drawable/button_circle"
         android:fontFamily="@font/spoqa_han_sans_regular"
         android:text="ADD"
-        android:textSize="15sp"
         android:textColor="@color/colorWhite"
+        android:textSize="15sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
