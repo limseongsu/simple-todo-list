@@ -10,10 +10,12 @@ import com.yxnsx.simpletodolist.databinding.ItemTodoBinding
 
 class TodoAdapter(
     var documentSnapshotList: List<DocumentSnapshot>,
-    val onClickDeleteIcon: (todo: DocumentSnapshot) -> Unit,
-    val onClickTodoItem: (todo: DocumentSnapshot) -> Unit
+    val itemListeners: ItemListeners
 ) :
     RecyclerView.Adapter<TodoAdapter.TodoViewHolder>() {
+
+    private var _viewBinding: ItemTodoBinding? = null
+    private val viewBinding get() = _viewBinding!!
 
 
     class TodoViewHolder(val todoBinding: ItemTodoBinding) :
@@ -23,49 +25,44 @@ class TodoAdapter(
         parent: ViewGroup,
         viewType: Int
     ): TodoViewHolder {
-        // item_todo 뷰 인플레이팅
-        val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_todo, parent, false)
-        // 뷰바인딩 및 뷰홀더 생성
-        return TodoViewHolder(ItemTodoBinding.bind(view))
-    }
-
-    override fun onBindViewHolder(holder: TodoViewHolder, position: Int) {
-        // documentSnapshotList의 인덱스 값 바탕으로 todo 객체 생성
-        val todo = documentSnapshotList[position]
-
-        // todo 객체의 done 불리언 값이 true일 경우
-        if (todo.getBoolean("done") == true) {
-            holder.todoBinding.apply {
-                textViewTodo.paintFlags = textViewTodo.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
-                textViewTodo.setTextColor(root.context.getColor(R.color.colorBlack_15))
-                buttonDelete.setBackgroundResource(R.drawable.icon_delete_15)
-            }
-
-        } else { // todo 객체의 done 불리언 값이 false일 경우
-            holder.todoBinding.apply {
-                textViewTodo.paintFlags = 0
-                textViewTodo.setTextColor(root.context.getColor(R.color.colorBlack))
-                buttonDelete.setBackgroundResource(R.drawable.icon_delete)
-            }
-        }
-
-        holder.todoBinding.apply {
-            // 각 뷰홀더의 textViewTodo에 todo 객체의 text 값 적용
-            textViewTodo.text = todo.getString("text")
-
-            // 삭제 버튼 클릭리스너 설정
-            buttonDelete.setOnClickListener {
-                onClickDeleteIcon.invoke(todo)
-            }
-            // 아이템 클릭리스너 설정
-            root.setOnClickListener {
-                onClickTodoItem.invoke(todo)
-            }
-        }
+        _viewBinding = ItemTodoBinding.inflate(LayoutInflater.from(parent.context))
+        return TodoViewHolder(viewBinding)
     }
 
     override fun getItemCount() = documentSnapshotList.size
+    override fun onBindViewHolder(holder: TodoViewHolder, position: Int) {
+        val todo = documentSnapshotList[position]
+        setTodoData(holder, todo)
+        setListeners(holder, todo)
+    }
+
+    private fun setTodoData(holder: TodoViewHolder, todo: DocumentSnapshot) {
+        when (todo.getBoolean("done")) {
+            true -> {
+                holder.todoBinding.apply {
+                    textViewTodo.text = todo.getString("text")
+                    textViewTodo.paintFlags = textViewTodo.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
+                    textViewTodo.setTextColor(root.context.getColor(R.color.colorBlack_15))
+                    buttonDelete.setBackgroundResource(R.drawable.icon_delete_15)
+                }
+            }
+            else -> {
+                holder.todoBinding.apply {
+                    textViewTodo.text = todo.getString("text")
+                    textViewTodo.paintFlags = 0
+                    textViewTodo.setTextColor(root.context.getColor(R.color.colorBlack))
+                    buttonDelete.setBackgroundResource(R.drawable.icon_delete)
+                }
+            }
+        }
+    }
+
+    private fun setListeners(holder: TodoViewHolder, todo: DocumentSnapshot) {
+        holder.todoBinding.apply {
+            buttonDelete.setOnClickListener { itemListeners.onClickDeleteIcon(todo) }
+            root.setOnClickListener { itemListeners.onClickTodoItem(todo) }
+        }
+    }
 
     fun setLiveData(newData: List<DocumentSnapshot>) {
         documentSnapshotList = newData
